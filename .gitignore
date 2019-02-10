@@ -1,2 +1,5 @@
 __pycache__/
 *.pyc
+venv/
+dist/
+drf_firebase_auth.egg-info/
