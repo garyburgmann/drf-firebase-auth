@@ -4,3 +4,4 @@ venv/
 dist/
 drf_firebase_auth.egg-info/
 .vscode/
+README.hidden.md

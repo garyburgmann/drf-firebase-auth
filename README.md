@@ -75,9 +75,3 @@ Now that you have configured the application, make and run the migrations so tha
 $ ./manage.py makemigrations drf_firebase_auth
 $ ./manage.py migrate drf_firebase_auth
 ```
-
-## Publishing
-
-`python setup.py sdist`
-
-`twine upload dist/*`
