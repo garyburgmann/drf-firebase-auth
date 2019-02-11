@@ -3,3 +3,4 @@ __pycache__/
 venv/
 dist/
 drf_firebase_auth.egg-info/
+.vscode/

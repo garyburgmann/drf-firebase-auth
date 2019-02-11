@@ -21,7 +21,8 @@ def get_version(package):
 name = 'drf-firebase-auth'
 version = get_version('drf_firebase_auth')
 package = 'drf_firebase_auth'
-description = 'Custom Django REST framework authentication backend for Firebase'
+description = 'Custom Django Rest Framework authentication backend for ' \
+              'parsing Firebase uid tokens and storing as local users.'
 url = 'https://github.com/garyburgmann/drf-firebase-auth'
 author = 'Gary Burgmann'
 author_email = 'garyburgmann@gmail.com'
