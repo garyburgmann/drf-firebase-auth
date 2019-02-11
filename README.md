@@ -75,3 +75,16 @@ Now that you have configured the application, make and run the migrations so tha
 $ ./manage.py makemigrations drf_firebase_auth
 $ ./manage.py migrate drf_firebase_auth
 ```
+
+All you need to do now is have your client code handle the Firebase popup/redirect authentication flow, retrieve the idToken from the currentUser (Firebase explains this flow well in their docs: `https://firebase.google.com/docs/auth/admin/verify-id-tokens`), and then use the idToken for the user in an `Authorization` header in requests to your API.
+
+```
+JWT <token>
+```
+
+Voila!
+
+## Contributing
+
+* If you test this code with a Python version not listed above and all is well, please fork and update the README to include the Python version you used :)
+* I almost always setup Django with a custom user class inheriting from AbstractUser, where I switch the USERNAME_FIELD to be 'email'. This backend is setup to assign a username still anyway, but if there are any issues, please raise them and/or make a pull request to help the community!
