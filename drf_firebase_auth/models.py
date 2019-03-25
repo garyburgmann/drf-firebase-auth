@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Models for storing the uid of authenticating firebase users and relating them
 to the local AUTH_USER_MODEL model.

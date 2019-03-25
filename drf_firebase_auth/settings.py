@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Settings config for the drf_firebase_auth application
 Author: Gary Burgmann
