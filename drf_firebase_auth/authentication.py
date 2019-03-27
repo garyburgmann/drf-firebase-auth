@@ -15,6 +15,7 @@ from firebase_admin import auth as firebase_auth
 from django.utils.encoding import smart_text
 from django.utils import timezone
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import AnonymousUser
 from rest_framework import (
     authentication,
     exceptions
@@ -39,6 +40,14 @@ class BaseFirebaseAuthentication(authentication.BaseAuthentication):
     Token based authentication using firebase.
     """
     def authenticate(self, request):
+        """
+        With ALLOW_ANONYMOUS_REQUESTS, set request.user to an AnonymousUser, 
+        allowing us to configure access at the permissions level.
+        """
+        authorization_header = authentication.get_authorization_header(request)
+        if api_settings.ALLOW_ANONYMOUS_REQUESTS and not authorization_header:
+            return (AnonymousUser(), None)
+
         """
         Returns a tuple of len(2) of `User` and the decoded firebase token if
         a valid signature has been supplied using Firebase authentication.

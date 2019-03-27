@@ -14,6 +14,8 @@ from rest_framework.settings import APISettings
 USER_SETTINGS = getattr(settings, 'DRF_FIREBASE_AUTH', None)
 
 DEFAULTS = {
+    # allow anonymous requests without Authorization header set
+    'ALLOW_ANONYMOUS_REQUESTS': False,
     # path to JSON file with firebase secrets
     'FIREBASE_SERVICE_ACCOUNT_KEY': '',
     # allow creation of new local user in db
