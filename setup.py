@@ -28,7 +28,7 @@ author = 'Gary Burgmann'
 author_email = 'garyburgmann@gmail.com'
 license = 'MIT'
 install_requires = [
-    'firebase-admin>=2.0.0',
+    'firebase-admin>=2.0.0'
 ]
 
 
@@ -36,7 +36,7 @@ def read(*paths):
     """
     Build a file path from paths and return the contents.
     """
-    with open(os.path.join(*paths), 'r') as f:
+    with open(os.path.join(*paths), 'r', encoding='utf-8') as f:
         return f.read()
 
 
@@ -93,7 +93,7 @@ setup(
     package_data=get_package_data(package),
     install_requires=install_requires,
     classifiers=[
-        'Development Status :: 5 - Production/Stable',
+        # 'Development Status :: 5 - Production/Stable',
         'Environment :: Web Environment',
         'Framework :: Django',
         'Intended Audience :: Developers',
