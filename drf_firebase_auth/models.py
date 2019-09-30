@@ -21,6 +21,9 @@ class FirebaseUser(models.Model):
     )
     uid = models.CharField(max_length=191, null=False,)
 
+    def __str__(self):
+        return str(self.user)
+
 
 class FirebaseUserProvider(models.Model):
     firebase_user = models.ForeignKey(
@@ -32,3 +35,6 @@ class FirebaseUserProvider(models.Model):
     )
     uid = models.CharField(max_length=191, null=False,)
     provider_id = models.CharField(max_length=50, null=False,)
+
+    def __str__(self):
+        return str(self.firebase_user)

@@ -7,7 +7,6 @@ Email: garyburgmann@gmail.com
 Location: Springfield QLD, Australia
 Last update: 2019-02-10
 """
-import json
 import uuid
 
 import firebase_admin
@@ -124,16 +123,16 @@ class FirebaseAuthentication(BaseFirebaseAuthentication):
                 'JWT was found to be invalid, or the App’s project ID cannot '
                 'be determined.'
             )
-        except firebase_auth.AuthError as exc:
-            if exc.code == 'ID_TOKEN_REVOKED':
-                raise exceptions.AuthenticationFailed(
-                    'Token revoked, inform the user to reauthenticate or '
-                    'signOut().'
-                )
-            else:
-                raise exceptions.AuthenticationFailed(
+        except firebase_auth.RevokedIdTokenError as exc:
+            raise exceptions.AuthenticationFailed(
+                'Token revoked, inform the user to reauthenticate or '
+                'signOut().'
+            )
+        except firebase_auth.InvalidIdTokenError as exc:
+            raise exceptions.AuthenticationFailed(
                     'Token is invalid.'
                 )
+
 
     def authenticate_token(self, decoded_token):
         """
@@ -152,11 +151,7 @@ class FirebaseAuthentication(BaseFirebaseAuthentication):
             raise exceptions.AuthenticationFailed(
                 'User ID is None, empty or malformed'
             )
-        except firebase_auth.AuthError:
-            raise exceptions.AuthenticationFailed(
-                'Error retrieving the user, or the specified user ID does not '
-                'exist'
-            )
+
 
     def get_or_create_local_user(self, firebase_user):
         """

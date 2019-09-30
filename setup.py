@@ -28,7 +28,7 @@ author = 'Gary Burgmann'
 author_email = 'garyburgmann@gmail.com'
 license = 'MIT'
 install_requires = [
-    'firebase-admin>=2.0.0',
+    'firebase-admin>=3.0.0',
 ]
 
 

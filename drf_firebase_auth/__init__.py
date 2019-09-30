@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 __title__ = 'drf-firebase-auth'
-__version__ = '0.0.4'
+__version__ = '0.0.5'
 __author__ = 'Gary Burgmann'
 __license__ = 'MIT'
 __copyright__ = 'Copyright 2019 Gary Burgmann'
