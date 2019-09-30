@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from drf_firebase_auth.models import FirebaseUser, FirebaseUserProvider
+from drf_firebase3_auth.models import FirebaseUser, FirebaseUserProvider
 
 
 @admin.register(FirebaseUser)

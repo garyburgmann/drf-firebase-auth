@@ -18,14 +18,14 @@ def get_version(package):
         return re.search("__version__ = ['\"]([^'\"]+)['\"]", src).group(1)
 
 
-name = 'drf-firebase-auth'
-version = get_version('drf_firebase_auth')
-package = 'drf_firebase_auth'
+name = 'drf-firebase3-auth'
+version = get_version('drf_firebase3_auth')
+package = 'drf_firebase3_auth'
 description = 'Custom Django Rest Framework authentication backend for ' \
               'parsing Firebase uid tokens and storing as local users.'
-url = 'https://github.com/garyburgmann/drf-firebase-auth'
-author = 'Gary Burgmann'
-author_email = 'garyburgmann@gmail.com'
+url = 'https://github.com/p141592/drf-firebase-auth'
+author = 'Baryshnikov Nikolay'
+author_email = 'mr.boiled@gmail.com'
 license = 'MIT'
 install_requires = [
     'firebase-admin>=3.0.0',
@@ -73,7 +73,7 @@ if sys.argv[-1] == 'publish':
     os.system('twine upload dist/*')
     shutil.rmtree('dist')
     shutil.rmtree('build')
-    shutil.rmtree('drf_firebase_auth.egg-info')
+    shutil.rmtree('drf_firebase3_auth.egg-info')
     print('You probably want to also tag the version now:')
     print("  git tag -a {0} -m 'version {0}'".format(version))
     print('  git push --tags')
@@ -87,6 +87,7 @@ setup(
     license=license,
     description=description,
     long_description=read('README.md'),
+    long_description_content_type='text/markdown',
     author=author,
     author_email=author_email,
     packages=get_packages(package),

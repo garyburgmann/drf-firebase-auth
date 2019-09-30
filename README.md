@@ -1,4 +1,4 @@
-# DRF Firebase Auth
+# DRF Firebase3 Auth
 
 ## Requirements
 
@@ -12,7 +12,7 @@
 ## Installation
 
 ```
-$ pip install drf-firebase-auth
+$ pip install drf-firebase3-auth
 ```
 
 Add the application to your project's `INSTALLED_APPS` in `settings.py`.
@@ -20,7 +20,7 @@ Add the application to your project's `INSTALLED_APPS` in `settings.py`.
 ```
 INSTALLED_APPS = [
     ...
-    'drf_firebase_auth',
+    'drf_firebase3_auth',
 ]
 ```
 
@@ -33,13 +33,13 @@ REST_FRAMEWORK = {
   'DEFAULT_AUTHENTICATION_CLASSES': [
     ...
     'rest_framework.authentication.SessionAuthentication',
-    'drf_firebase_auth.authentication.FirebaseAuthentication',
+    'drf_firebase3_auth.authentication.FirebaseAuthentication',
   ]
 }
 ```
 
 
-The `drf_firebase_auth` application comes with the following settings as default, which can be overridden in your project's `settings.py` file. Make sure to nest them within `DRF_FIREBASE_AUTH` as below:
+The `drf_firebase3_auth` application comes with the following settings as default, which can be overridden in your project's `settings.py` file. Make sure to nest them within `DRF_FIREBASE_AUTH` as below:
 
 
 ```
@@ -72,7 +72,7 @@ DRF_FIREBASE_AUTH = {
 Now that you have configured the application, run the migrations so that the Firebase data can be stored.
 
 ```
-$ ./manage.py migrate drf_firebase_auth
+$ ./manage.py migrate drf_firebase3_auth
 ```
 
 All you need to do now is have your client code handle the Firebase popup/redirect authentication flow, retrieve the idToken from the currentUser (Firebase explains this flow well in their docs: `https://firebase.google.com/docs/auth/admin/verify-id-tokens`), and then use the idToken for the user in an `Authorization` header in requests to your API.

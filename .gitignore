@@ -2,6 +2,6 @@ __pycache__/
 *.pyc
 venv/
 dist/
-drf_firebase_auth.egg-info/
+drf_firebase3_auth.egg-info/
 .vscode/
 README.hidden.md
