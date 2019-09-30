@@ -4,7 +4,6 @@
 #
 #    pip-compile --output-file=requirements.pip requirements.in
 #
---index-url https://web-registry.k8s.public.ru/repository/pypi/simple
 
 cachecontrol==0.12.5      # via firebase-admin
 cachetools==3.1.1         # via google-auth
