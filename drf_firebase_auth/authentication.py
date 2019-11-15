@@ -124,7 +124,10 @@ class FirebaseAuthentication(BaseFirebaseAuthentication):
                 'JWT was found to be invalid, or the App’s project ID cannot '
                 'be determined.'
             )
-        except firebase_auth.AuthError as exc:
+        except (firebase_auth.InvalidIdTokenError, 
+                firebase_auth.ExpiredIdTokenError, 
+                firebase_auth.RevokedIdTokenError, 
+                firebase_auth.CertificateFetchError) as exc:
             if exc.code == 'ID_TOKEN_REVOKED':
                 raise exceptions.AuthenticationFailed(
                     'Token revoked, inform the user to reauthenticate or '
