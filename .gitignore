@@ -6,12 +6,14 @@
 __pycache__/
 
 dist/
+build/
 
 .egg-info
 *.egg-info
 
 # virtual envs
 venv/
+.venv/
 
 # other
 README.hidden.md
