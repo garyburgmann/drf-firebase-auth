@@ -85,6 +85,7 @@ Voila!
 
 ## Contributing
 
+* Trello board created! Please follow this link if you wish to collabrate in the future direction of this package: https://trello.com/invite/b/lkAsvStS/af54d9a94359c042f3bd9afb47f82eab/drf-firebase-auth
 * Please raise an issue/feature and name your branch 'feature-n' or 'issue-n', where 'n' is the issue number.
 * If you test this code with a Python version not listed above and all is well, please fork and update the README to include the Python version you used :)
 * I almost always setup Django with a custom user class inheriting from AbstractUser, where I switch the USERNAME_FIELD to be 'email'. This backend is setup to assign a username still anyway, but if there are any issues, please raise them and/or make a pull request to help the community!
