@@ -5,7 +5,7 @@ Authorization header, verifying, and locally authenticating
 Author: Gary Burgmann
 Email: garyburgmann@gmail.com
 Location: Springfield QLD, Australia
-Last update: 2019-02-10
+Last update: 2020-05-06
 """
 import json
 import uuid
@@ -191,7 +191,7 @@ class FirebaseAuthentication(BaseFirebaseAuthentication):
                 email=email
             )
             new_user.last_login = timezone.now()
-            if api_settings.FIREBASE_ATTEMPT_CREATE_WITH_DISPLAY_NAME:
+            if api_settings.FIREBASE_ATTEMPT_CREATE_WITH_DISPLAY_NAME and firebase_user.display_name is not None:
                 display_name = firebase_user.display_name.split()
                 if len(display_name) == 2:
                     new_user.first_name = display_name[0]
