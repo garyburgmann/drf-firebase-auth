@@ -3,7 +3,7 @@
 ## Requirements
 
 
-* Python (tested with 2.7, 3.6)
+* Python3
 * Django
 * Django Rest Framework
 
