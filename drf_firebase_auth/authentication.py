@@ -2,12 +2,7 @@
 """
 Authentication backend for handling firebase user.idToken from incoming
 Authorization header, verifying, and locally authenticating
-Author: Gary Burgmann
-Email: garyburgmann@gmail.com
-Location: Springfield QLD, Australia
-Last update: 2020-05-06
 """
-import json
 import uuid
 
 import firebase_admin
@@ -137,6 +132,10 @@ class FirebaseAuthentication(BaseFirebaseAuthentication):
                 raise exceptions.AuthenticationFailed(
                     'Token is invalid.'
                 )
+        except Exception as e:
+            raise exceptions.AuthenticationFailed(
+                f'Exception: {e}'
+            )
 
     def authenticate_token(self, decoded_token):
         """
@@ -159,6 +158,10 @@ class FirebaseAuthentication(BaseFirebaseAuthentication):
             raise exceptions.AuthenticationFailed(
                 'Error retrieving the user, or the specified user ID does not '
                 'exist'
+            )
+        except Exception as e:
+            raise exceptions.AuthenticationFailed(
+                f'Exception: {e}'
             )
 
     def get_or_create_local_user(self, firebase_user):

@@ -6,6 +6,8 @@
 __pycache__/
 
 dist/
+build/
+dev/
 
 .egg-info
 *.egg-info
