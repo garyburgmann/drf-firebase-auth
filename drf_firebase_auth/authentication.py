@@ -155,7 +155,7 @@ class FirebaseAuthentication(BaseFirebaseAuthentication):
             raise exceptions.AuthenticationFailed(
                 'User ID is None, empty or malformed'
             )
-        except firebase_auth.AuthError:
+        except firebase_auth.UserNotFoundError:
             raise exceptions.AuthenticationFailed(
                 'Error retrieving the user, or the specified user ID does not '
                 'exist'
