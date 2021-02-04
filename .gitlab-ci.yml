@@ -1,0 +1,28 @@
+image: python:3.9
+
+# variables:
+  # IMAGE_LATEST: ${CI_REGISTRY_IMAGE}:latest
+  # IMAGE_SHORT_SHA: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHORT_SHA}
+
+stages:
+  - Static Analysis
+  - Test
+  # - build
+  # - publish
+
+linting:
+  stage: Static Analysis
+  image: python:3.9
+  before_script:
+    - python --version
+    - pip install pycodestyle
+  script:
+    - pycodestyle --format=pylint --exclude='*migrations/*'  drf_firebase_auth/
+
+unit test:
+  stage: Test
+  script:
+    - pip install .
+    - cd testapp
+    - cat ${FIREBASE_JSON} > /tmp/firebase.json
+    - ./manage.py test
