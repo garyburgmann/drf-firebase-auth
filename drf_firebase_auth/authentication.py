@@ -56,7 +56,7 @@ class FirebaseAuthentication(authentication.TokenAuthentication):
             raise exceptions.AuthenticationFailed(e)
 
     def _decode_token(self, token: str) -> Dict:
-        """ 
+        """
         Attempt to verify JWT from Authorization header with Firebase and
         return the decoded token
         """
@@ -118,7 +118,8 @@ class FirebaseAuthentication(authentication.TokenAuthentication):
             )
             if not api_settings.FIREBASE_CREATE_LOCAL_USER:
                 raise Exception('User is not registered to the application.')
-            username = api_settings.FIREBASE_USERNAME_MAPPING_FUNC(firebase_user)
+            username = \
+                api_settings.FIREBASE_USERNAME_MAPPING_FUNC(firebase_user)
             log.info(
                 f'_get_or_create_local_user - username: {username}'
             )
@@ -163,7 +164,7 @@ class FirebaseAuthentication(authentication.TokenAuthentication):
         if local_firebase_user.uid != firebase_user.uid:
             local_firebase_user.uid = firebase_user.uid
             local_firebase_user.save()
-        
+
         # store FirebaseUserProvider data
         for provider in firebase_user.provider_data:
             local_provider = FirebaseUserProvider.objects.filter(
@@ -178,7 +179,7 @@ class FirebaseAuthentication(authentication.TokenAuthentication):
                 )
                 new_local_provider.save()
 
-        # catch locally stored providers that are no longer associated at Firebase
+        # catch locally stored providers no longer associated at Firebase
         local_providers = FirebaseUserProvider.objects.filter(
             firebase_user=local_firebase_user
         )

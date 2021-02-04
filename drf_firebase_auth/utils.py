@@ -22,7 +22,7 @@ def map_firebase_display_name_to_username(
     try:
         return '_'.join(firebase_user.display_name.split(' '))
     except Exception as e:
-            raise Exception(e)
+        raise Exception(e)
 
 
 def map_firebase_uid_to_username(

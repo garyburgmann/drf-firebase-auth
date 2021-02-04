@@ -24,7 +24,7 @@ DEFAULTS = {
     # require that firebase user.email_verified is True
     'FIREBASE_AUTH_EMAIL_VERIFICATION': False,
     # function should accept firebase_admin.auth.UserRecord as argument
-    # and return str 
+    # and return str
     'FIREBASE_USERNAME_MAPPING_FUNC': map_firebase_uid_to_username
 }
 
