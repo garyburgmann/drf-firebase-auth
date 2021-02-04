@@ -1,15 +1,9 @@
 # -*- coding: utf-8 -*-
-"""
-Settings config for the drf_firebase_auth application
-Author: Gary Burgmann
-Email: garyburgmann@gmail.com
-Location: Springfield QLD, Australia
-Last update: 2019-02-10
-"""
-import datetime
-
+""" Settings config for the drf_firebase_auth application """
 from django.conf import settings
 from rest_framework.settings import APISettings
+
+from .utils import map_firebase_uid_to_username
 
 USER_SETTINGS = getattr(settings, 'DRF_FIREBASE_AUTH', None)
 
@@ -28,7 +22,10 @@ DEFAULTS = {
     # verify that JWT has not been revoked
     'FIREBASE_CHECK_JWT_REVOKED': True,
     # require that firebase user.email_verified is True
-    'FIREBASE_AUTH_EMAIL_VERIFICATION': False
+    'FIREBASE_AUTH_EMAIL_VERIFICATION': False,
+    # function should accept firebase_admin.auth.UserRecord as argument
+    # and return str 
+    'FIREBASE_USERNAME_MAPPING_FUNC': map_firebase_uid_to_username
 }
 
 # List of settings that may be in string import notation.

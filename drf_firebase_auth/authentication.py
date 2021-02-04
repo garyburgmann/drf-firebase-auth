@@ -3,7 +3,8 @@
 Authentication backend for handling firebase user.idToken from incoming
 Authorization header, verifying, and locally authenticating
 """
-import uuid
+from typing import Tuple, Dict
+import logging
 
 import firebase_admin
 from firebase_admin import auth as firebase_auth
@@ -16,197 +17,136 @@ from rest_framework import (
     exceptions
 )
 
-from drf_firebase_auth.settings import api_settings
-from drf_firebase_auth.models import (
+from .settings import api_settings
+from .models import (
     FirebaseUser,
     FirebaseUserProvider
 )
+from .utils import get_firebase_user_email
+from . import __title__
 
+log = logging.getLogger(__title__)
 User = get_user_model()
 
 firebase_credentials = firebase_admin.credentials.Certificate(
     api_settings.FIREBASE_SERVICE_ACCOUNT_KEY
 )
-firebase = firebase_admin.initialize_app(firebase_credentials)
+firebase = firebase_admin.initialize_app(
+    credential=firebase_credentials,
+)
 
 
-class BaseFirebaseAuthentication(authentication.BaseAuthentication):
+class FirebaseAuthentication(authentication.TokenAuthentication):
     """
     Token based authentication using firebase.
     """
-    def authenticate(self, request):
-        """
-        With ALLOW_ANONYMOUS_REQUESTS, set request.user to an AnonymousUser, 
-        allowing us to configure access at the permissions level.
-        """
-        authorization_header = authentication.get_authorization_header(request)
-        if api_settings.ALLOW_ANONYMOUS_REQUESTS and not authorization_header:
-            return (AnonymousUser(), None)
+    keyword = api_settings.FIREBASE_AUTH_HEADER_PREFIX
 
-        """
-        Returns a tuple of len(2) of `User` and the decoded firebase token if
-        a valid signature has been supplied using Firebase authentication.
-        """
-        firebase_token = self.get_token(request)
+    def authenticate_credentials(
+        self,
+        token: str
+    ) -> Tuple[AnonymousUser, Dict]:
+        try:
+            decoded_token = self._decode_token(token)
+            firebase_user = self._authenticate_token(decoded_token)
+            local_user = self._get_or_create_local_user(firebase_user)
+            self._create_local_firebase_user(local_user, firebase_user)
+            return (local_user, decoded_token)
+        except Exception as e:
+            raise exceptions.AuthenticationFailed(e)
 
-        decoded_token = self.decode_token(firebase_token)
-
-        firebase_user = self.authenticate_token(decoded_token)
-
-        local_user = self.get_or_create_local_user(firebase_user)
-
-        self.create_local_firebase_user(local_user, firebase_user)
-        # authenicated_user = self.authenticate_user(firebase_user)
-
-        return (local_user, decoded_token)
-
-    def get_token(self, request):
-        raise NotImplementedError('get_token() has not been implemented.')
-
-    def decode_token(self, firebase_token):
-        raise NotImplementedError('decode_token() has not been implemented.')
-
-    def authenticate_token(self, decoded_token):
-        raise NotImplementedError('authenticate_token() has not been implemented.')
-
-    def get_or_create_local_user(self, firebase_user):
-        raise NotImplementedError('get_or_create_local_user() has not been implemented.')
-
-    def create_local_firebase_user(self, local_user, firebase_user):
-        raise NotImplementedError('create_local_firebase_user() has not been implemented.')
-
-
-class FirebaseAuthentication(BaseFirebaseAuthentication):
-    """
-    Clients should authenticate by passing the token key in the
-    'Authorization' HTTP header, prepended with the string specified in the
-    settings.FIREBASE_AUTH_HEADER_PREFIX setting (Default = 'JWT')
-    """
-    www_authenticate_realm = 'api'
-
-    def get_token(self, request):
-        """
-        Parse Authorization header and retrieve JWT
-        """
-        authorization_header = \
-            authentication.get_authorization_header(request).split()
-        auth_header_prefix = api_settings.FIREBASE_AUTH_HEADER_PREFIX.lower()
-
-        if not authorization_header or len(authorization_header) != 2:
-            raise exceptions.AuthenticationFailed(
-                'Invalid Authorization header format, expecting: JWT <token>.'
-            )
-
-        if smart_text(authorization_header[0].lower()) != auth_header_prefix:
-            raise exceptions.AuthenticationFailed(
-                'Invalid Authorization header prefix, expecting: JWT.'
-            )
-        
-        return authorization_header[1]
-
-    def decode_token(self, firebase_token):
-        """
+    def _decode_token(self, token: str) -> Dict:
+        """ 
         Attempt to verify JWT from Authorization header with Firebase and
         return the decoded token
         """
         try:
-            return firebase_auth.verify_id_token(
-                firebase_token,
+            decoded_token = firebase_auth.verify_id_token(
+                token,
                 check_revoked=api_settings.FIREBASE_CHECK_JWT_REVOKED
             )
-        except ValueError as exc:
-            raise exceptions.AuthenticationFailed(
-                'JWT was found to be invalid, or the App’s project ID cannot '
-                'be determined.'
-            )
-        except (firebase_auth.InvalidIdTokenError, 
-                firebase_auth.ExpiredIdTokenError, 
-                firebase_auth.RevokedIdTokenError, 
-                firebase_auth.CertificateFetchError) as exc:
-            if exc.code == 'ID_TOKEN_REVOKED':
-                raise exceptions.AuthenticationFailed(
-                    'Token revoked, inform the user to reauthenticate or '
-                    'signOut().'
-                )
-            else:
-                raise exceptions.AuthenticationFailed(
-                    'Token is invalid.'
-                )
+            log.info(f'_decode_token - decoded_token: {decoded_token}')
+            return decoded_token
         except Exception as e:
-            raise exceptions.AuthenticationFailed(
-                f'Exception: {e}'
-            )
+            log.error(f'_decode_token - Exception: {e}')
+            raise Exception(e)
 
-    def authenticate_token(self, decoded_token):
-        """
-        Returns firebase user if token is authenticated
-        """
+    def _authenticate_token(
+        self,
+        decoded_token: Dict
+    ) -> firebase_auth.UserRecord:
+        """ Returns firebase user if token is authenticated """
         try:
             uid = decoded_token.get('uid')
+            log.info(f'_authenticate_token - uid: {uid}')
             firebase_user = firebase_auth.get_user(uid)
+            log.info(f'_authenticate_token - firebase_user: {firebase_user}')
             if api_settings.FIREBASE_AUTH_EMAIL_VERIFICATION:
                 if not firebase_user.email_verified:
-                    raise exceptions.AuthenticationFailed(
+                    raise Exception(
                         'Email address of this user has not been verified.'
                     )
             return firebase_user
-        except ValueError:
-            raise exceptions.AuthenticationFailed(
-                'User ID is None, empty or malformed'
-            )
-        except firebase_auth.UserNotFoundError:
-            raise exceptions.AuthenticationFailed(
-                'Error retrieving the user, or the specified user ID does not '
-                'exist'
-            )
         except Exception as e:
-            raise exceptions.AuthenticationFailed(
-                f'Exception: {e}'
-            )
+            log.error(f'_authenticate_token - Exception: {e}')
+            raise Exception(e)
 
-    def get_or_create_local_user(self, firebase_user):
+    def _get_or_create_local_user(
+        self,
+        firebase_user: firebase_auth.UserRecord
+    ) -> User:
         """
         Attempts to return or create a local User from Firebase user data
         """
-        email = firebase_user.email if firebase_user.email \
-            else firebase_user.provider_data[0].email
+        email = get_firebase_user_email(firebase_user)
+        log.info(f'_get_or_create_local_user - email: {email}')
+        user = None
         try:
             user = User.objects.get(email=email)
+            log.info(
+                f'_get_or_create_local_user - user.is_active: {user.is_active}'
+            )
             if not user.is_active:
-                raise exceptions.AuthenticationFailed(
+                raise Exception(
                     'User account is not currently active.'
                 )
             user.last_login = timezone.now()
             user.save()
-            return user
-        except User.DoesNotExist:
+        except User.DoesNotExist as e:
+            log.error(
+                f'_get_or_create_local_user - User.DoesNotExist: {email}'
+            )
             if not api_settings.FIREBASE_CREATE_LOCAL_USER:
-                raise exceptions.AuthenticationFailed(
-                    'User is not registered to the application.'
+                raise Exception('User is not registered to the application.')
+            username = api_settings.FIREBASE_USERNAME_MAPPING_FUNC(firebase_user)
+            log.info(
+                f'_get_or_create_local_user - username: {username}'
+            )
+            try:
+                user = User.objects.create_user(
+                    username=username,
+                    email=email
                 )
-            username = '_'.join(
-                firebase_user.display_name.split(' ') if firebase_user.display_name \
-                else str(uuid.uuid4())
-            )
-            username = username if len(username) <= 30 else username[:30]
-            new_user = User.objects.create_user(
-                username=username,
-                email=email
-            )
-            new_user.last_login = timezone.now()
-            if api_settings.FIREBASE_ATTEMPT_CREATE_WITH_DISPLAY_NAME and firebase_user.display_name is not None:
-                display_name = firebase_user.display_name.split()
-                if len(display_name) == 2:
-                    new_user.first_name = display_name[0]
-                    new_user.last_name = display_name[1]
-            new_user.save()
-            # self.create_local_firebase_user(new_user, firebase_user)
-            return new_user
+                user.last_login = timezone.now()
+                if (
+                    api_settings.FIREBASE_ATTEMPT_CREATE_WITH_DISPLAY_NAME
+                    and firebase_user.display_name is not None
+                ):
+                    display_name = firebase_user.display_name.split(' ')
+                    if len(display_name) == 2:
+                        user.first_name = display_name[0]
+                        user.last_name = display_name[1]
+                user.save()
+            except Exception as e:
+                raise Exception(e)
+        return user
 
-    def create_local_firebase_user(self, user, firebase_user):
-        """
-        Create a local FireBase model if one does not already exist
-        """
+    def _create_local_firebase_user(
+        self,
+        user: User,
+        firebase_user: firebase_auth.UserRecord
+    ):
+        """ Create a local FireBase model if one does not already exist """
         # pylint: disable=no-member
         local_firebase_user = FirebaseUser.objects.filter(
             user=user
@@ -250,12 +190,3 @@ class FirebaseAuthentication(BaseFirebaseAuthentication):
                     FirebaseUserProvider.objects.filter(
                         id=provider.id
                     ).delete()
-
-    def authenticate_header(self, request):
-        """
-        Return a string to be used as the value of the `WWW-Authenticate`
-        header in a `401 Unauthenticated` response, or `None` if the
-        authentication scheme should return `403 Permission Denied` responses.
-        """
-        auth_header_prefix = api_settings.FIREBASE_AUTH_HEADER_PREFIX.lower()
-        return '{0} realm="{1}"'.format(auth_header_prefix, self.www_authenticate_realm)

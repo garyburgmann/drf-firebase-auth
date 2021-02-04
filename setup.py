@@ -22,6 +22,7 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     python_requires='>=3.4',
     install_requires = [
+        'djangorestframework>=3.9,<4',
         'firebase-admin>=4.5,<5'
     ],
     classifiers=[
