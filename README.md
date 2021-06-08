@@ -2,12 +2,9 @@
 
 ## Requirements
 
-
-* Python3
-* Django
-* Django Rest Framework
-
-
+- Python3
+- Django
+- Django Rest Framework
 
 ## Installation
 
@@ -26,7 +23,6 @@ INSTALLED_APPS = [
 
 In your project's `settings.py`, add this to the `REST_FRAMEWORK` configuration. Note that if you want to retain access to the browsable API for locally created users, then you will probably want to keep `rest_framework.authentication.SessionAuthentication` too.
 
-
 ```python
 REST_FRAMEWORK = {
   ...
@@ -38,9 +34,7 @@ REST_FRAMEWORK = {
 }
 ```
 
-
 The `drf_firebase_auth` application comes with the following settings as default, which can be overridden in your project's `settings.py` file. For convenience in version >= 1, most of these can be conveniently set form environment variables also. Make sure to nest them within `DRF_FIREBASE_AUTH` as below:
-
 
 ```python
 DRF_FIREBASE_AUTH = {
@@ -68,6 +62,14 @@ DRF_FIREBASE_AUTH = {
     # function should accept firebase_admin.auth.UserRecord as argument
     # and return str
     'FIREBASE_USERNAME_MAPPING_FUNC': map_firebase_uid_to_username
+    # Local user unique field that will be used to map firebase user to local user
+    'FIREBASE_UNIQUE_USER_FIELD_MAPPING_FUNC': get_firebase_user_email,
+    'FIREBASE_UNIQUE_USER_FIELD_NAME': 'email',
+    'LOCAL_UNIQUE_USER_FIELD_NAME': 'email',
+    # if you want to map users based on phone_number you comment values above and add
+    # 'FIREBASE_UNIQUE_USER_FIELD_MAPPING_FUNC': get_firebase_user_phone_number,
+    # 'FIREBASE_UNIQUE_USER_FIELD_NAME': 'phone_number',
+    # 'LOCAL_UNIQUE_USER_FIELD_NAME': 'phone_number',
 }
 ```
 
@@ -142,7 +144,7 @@ Voila!
 
 ## Contributing
 
-* Trello board created! Please follow this link if you wish to collabrate in the future direction of this package: https://trello.com/invite/b/lkAsvStS/af54d9a94359c042f3bd9afb47f82eab/drf-firebase-auth
-* Please raise an issue/feature and name your branch 'feature-n' or 'issue-n', where 'n' is the issue number.
-* If you test this code with a Python version not listed above and all is well, please fork and update the README to include the Python version you used :)
-* I almost always setup Django with a custom user class inheriting from AbstractUser, where I switch the USERNAME_FIELD to be 'email'. This backend is setup to assign a username still anyway, but if there are any issues, please raise them and/or make a pull request to help the community!
+- Trello board created! Please follow this link if you wish to collabrate in the future direction of this package: https://trello.com/invite/b/lkAsvStS/af54d9a94359c042f3bd9afb47f82eab/drf-firebase-auth
+- Please raise an issue/feature and name your branch 'feature-n' or 'issue-n', where 'n' is the issue number.
+- If you test this code with a Python version not listed above and all is well, please fork and update the README to include the Python version you used :)
+- I almost always setup Django with a custom user class inheriting from AbstractUser, where I switch the USERNAME_FIELD to be 'email'. This backend is setup to assign a username still anyway, but if there are any issues, please raise them and/or make a pull request to help the community!
