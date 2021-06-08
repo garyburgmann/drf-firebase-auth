@@ -22,7 +22,6 @@ from .models import (
     FirebaseUser,
     FirebaseUserProvider
 )
-from .utils import get_firebase_user_email
 from . import __title__
 
 log = logging.getLogger(__title__)
@@ -81,7 +80,7 @@ class FirebaseAuthentication(authentication.TokenAuthentication):
             log.info(f'_authenticate_token - uid: {uid}')
             firebase_user = firebase_auth.get_user(uid)
             log.info(f'_authenticate_token - firebase_user: {firebase_user}')
-            if api_settings.FIREBASE_AUTH_EMAIL_VERIFICATION:
+            if api_settings.FIREBASE_UNIQUE_USER_FIELD_NAME == 'email' and api_settings.FIREBASE_AUTH_EMAIL_VERIFICATION:
                 if not firebase_user.email_verified:
                     raise Exception(
                         'Email address of this user has not been verified.'
@@ -98,11 +97,15 @@ class FirebaseAuthentication(authentication.TokenAuthentication):
         """
         Attempts to return or create a local User from Firebase user data
         """
-        email = get_firebase_user_email(firebase_user)
-        log.info(f'_get_or_create_local_user - email: {email}')
+        unique_user_value = api_settings.FIREBASE_UNIQUE_USER_FIELD_MAPPING_FUNC(
+            firebase_user)
+        log.info(
+            f'_get_or_create_local_user - unique user value: {unique_user_value}')
         user = None
         try:
-            user = User.objects.get(email=email)
+            kargs = {
+                api_settings.LOCAL_UNIQUE_USER_FIELD_NAME: unique_user_value}
+            user = User.objects.get(**kargs)
             log.info(
                 f'_get_or_create_local_user - user.is_active: {user.is_active}'
             )
@@ -114,7 +117,7 @@ class FirebaseAuthentication(authentication.TokenAuthentication):
             user.save()
         except User.DoesNotExist as e:
             log.error(
-                f'_get_or_create_local_user - User.DoesNotExist: {email}'
+                f'_get_or_create_local_user - User.DoesNotExist: {unique_user_value}'
             )
             if not api_settings.FIREBASE_CREATE_LOCAL_USER:
                 raise Exception('User is not registered to the application.')
@@ -124,10 +127,8 @@ class FirebaseAuthentication(authentication.TokenAuthentication):
                 f'_get_or_create_local_user - username: {username}'
             )
             try:
-                user = User.objects.create_user(
-                    username=username,
-                    email=email
-                )
+                kargs[username] = username
+                user = User.objects.create_user(**kargs)
                 user.last_login = timezone.now()
                 if (
                     api_settings.FIREBASE_ATTEMPT_CREATE_WITH_DISPLAY_NAME
