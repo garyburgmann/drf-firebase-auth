@@ -141,6 +141,7 @@ class FirebaseAuthentication(authentication.TokenAuthentication):
                 user.save()
             except Exception as e:
                 raise Exception(e)
+        print('user', user.phone_number)
         return user
 
     def _create_local_firebase_user(
