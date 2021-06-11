@@ -127,7 +127,7 @@ class FirebaseAuthentication(authentication.TokenAuthentication):
                 f'_get_or_create_local_user - username: {username}'
             )
             try:
-                kargs[api.LOCAL_UNIQUE_USER_FIELD_NAME] = username
+                kargs[api_settings.LOCAL_UNIQUE_USER_FIELD_NAME] = username
                 user = User.objects.create_user(**kargs)
                 user.last_login = timezone.now()
                 if (
