@@ -66,12 +66,6 @@ class FirebaseAuthentication(authentication.TokenAuthentication):
             )
             log.info(f'_decode_token - decoded_token: {decoded_token}')
             return decoded_token
-        except firebase_auth.ExpiredIdTokenError as e:
-            if not api_settings.FIREBASE_IGNORE_JWT_EXPIRED:
-                log.error(f'_decode_token - Exception: {e}')
-                raise Exception(e)
-            else:
-                log.warn(f'_decode_token - Exception: {e}')
         except Exception as e:
             log.error(f'_decode_token - Exception: {e}')
             raise Exception(e)

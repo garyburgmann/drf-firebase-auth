@@ -28,9 +28,6 @@ DEFAULTS = {
     # verify that JWT has not been revoked
     'FIREBASE_CHECK_JWT_REVOKED':
         os.getenv('FIREBASE_CHECK_JWT_REVOKED', True),
-    # ignore if JWT has been expired
-    'FIREBASE_IGNORE_JWT_EXPIRED':
-        os.getenv('FIREBASE_IGNORE_JWT_EXPIRED', False),
     # require that firebase user.email_verified is True
     'FIREBASE_AUTH_EMAIL_VERIFICATION':
         os.getenv('FIREBASE_AUTH_EMAIL_VERIFICATION', False),
