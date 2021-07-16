@@ -10,7 +10,7 @@ import firebase_admin
 from firebase_admin import auth as firebase_auth
 from drf_firebase_auth.settings import api_settings
 from drf_firebase_auth.utils import (
-    get_firebase_user_email,
+    get_firebase_user_identifier,
     map_firebase_uid_to_username,
     map_firebase_email_to_username
 )
@@ -25,7 +25,7 @@ firebase = firebase_admin.initialize_app(
 )
 
 class WhoAmITests(APITestCase):
-    
+
     def setUp(self):
         self._url = reverse('whoami')
         self._test_user_email = 'user@example.com'
@@ -103,7 +103,7 @@ class WhoAmITests(APITestCase):
                 status.HTTP_403_FORBIDDEN,
                 f'{api_settings.FIREBASE_CREATE_LOCAL_USER}'
             )
-        
+
         with self._MOCK_FIREBASE_CREATE_LOCAL_USER_TRUE:
             response = self.client.get(self._url)
             self.assertEqual(
@@ -143,11 +143,11 @@ class WhoAmITests(APITestCase):
             )
         )
         firebase_user = self._get_test_user()
-        firebase_user_email = get_firebase_user_email(firebase_user)
+        firebase_user_email = get_firebase_user_identifier(firebase_user)
 
         with self._MOCK_FIREBASE_CREATE_LOCAL_USER_FALSE:
             before_count = User.objects.count()
-            
+
             response = self.client.get(self._url)
             self.assertEqual(
                 response.status_code,
@@ -161,11 +161,11 @@ class WhoAmITests(APITestCase):
 
             with self.assertRaises(Exception):
                 _ = User.objects.get(email=firebase_user_email)
-        
+
         with self._MOCK_FIREBASE_CREATE_LOCAL_USER_TRUE:
             with self._MOCK_FIREBASE_USERNAME_MAPPING_FUNC_UID:
                 before_count = User.objects.count()
-                
+
                 response = self.client.get(self._url)
                 self.assertEqual(
                     response.status_code,
@@ -193,11 +193,11 @@ class WhoAmITests(APITestCase):
             )
         )
         firebase_user = self._get_test_user()
-        firebase_user_email = get_firebase_user_email(firebase_user)
+        firebase_user_email = get_firebase_user_identifier(firebase_user)
 
         with self._MOCK_FIREBASE_CREATE_LOCAL_USER_FALSE:
             before_count = User.objects.count()
-            
+
             response = self.client.get(self._url)
             self.assertEqual(
                 response.status_code,
@@ -211,11 +211,11 @@ class WhoAmITests(APITestCase):
 
             with self.assertRaises(Exception):
                 _ = User.objects.get(email=firebase_user_email)
-        
+
         with self._MOCK_FIREBASE_CREATE_LOCAL_USER_TRUE:
             with self._MOCK_FIREBASE_USERNAME_MAPPING_FUNC_EMAIL:
                 before_count = User.objects.count()
-                
+
                 response = self.client.get(self._url)
                 self.assertEqual(
                     response.status_code,
