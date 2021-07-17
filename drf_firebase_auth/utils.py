@@ -10,7 +10,7 @@ def get_firebase_user_identifier(firebase_user: auth.UserRecord) -> str:
         if firebase_user.email:
             return firebase_user.email
         elif firebase_user.provider_data[0].email:
-            firebase_user.provider_data[0].email
+            return firebase_user.provider_data[0].email
         elif firebase_user.phone_number:
             return firebase_user.phone_number
         elif firebase_user.provider_data[0].phone_number:
