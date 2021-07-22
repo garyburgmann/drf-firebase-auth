@@ -7,6 +7,14 @@ from firebase_admin import auth
 
 def get_firebase_user_uid(firebase_user: auth.UserRecord) -> str:
     try:
+        if firebase_user.uid:
+            return firebase_user.uid
+    except Exception as e:
+        raise Exception(e)
+
+
+def get_firebase_user_identifier(firebase_user: auth.UserRecord) -> str:
+    try:
         if firebase_user.email:
             return firebase_user.email
         elif firebase_user.provider_data[0].email:
@@ -55,7 +63,7 @@ def map_firebase_email_to_username(
     firebase_user: auth.UserRecord
 ) -> str:
     try:
-        return get_firebase_user_uid(firebase_user)
+        return get_firebase_user_identifier(firebase_user)
     except Exception as e:
         raise Exception(e)
 
