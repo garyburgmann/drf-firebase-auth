@@ -127,10 +127,12 @@ class FirebaseAuthentication(authentication.TokenAuthentication):
                 f'_get_or_create_local_user - username: {uid}'
             )
             try:
+                print("drf-firebase-auth: Starting to create user...")
                 user = User.objects.create_user(
                     username=uid,
                     email=identifier
                 )
+                print("drf-firebase-auth: New user was created succesufully.")
                 user.last_login = timezone.now()
                 if (
                     api_settings.FIREBASE_ATTEMPT_CREATE_WITH_DISPLAY_NAME
@@ -141,7 +143,7 @@ class FirebaseAuthentication(authentication.TokenAuthentication):
                         user.first_name = display_name[0]
                         user.last_name = display_name[1]
                 user.save()
-                print("drf-firebase-auth: New user was created succesufully.")
+                print("drf-firebase-auth: New user was saved succesufully.")
             except Exception as e:
                 print("drf-firebase-auth: Unable to create new user.")
                 print(f"drf-firebase-auth: The following exception occurred {e}")
