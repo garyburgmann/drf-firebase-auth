@@ -141,6 +141,7 @@ class FirebaseAuthentication(authentication.TokenAuthentication):
                         user.first_name = display_name[0]
                         user.last_name = display_name[1]
                 user.save()
+                print("drf-firebase-auth: New user was created succesufully.")
             except Exception as e:
                 print("drf-firebase-auth: Unable to create new user.")
                 print(f"drf-firebase-auth: The following exception occurred {e}")
