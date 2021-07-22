@@ -99,6 +99,7 @@ class FirebaseAuthentication(authentication.TokenAuthentication):
         Attempts to return or create a local User from Firebase user data
         """
         uid = get_firebase_user_uid(firebase_user)
+        print(f"drf-firebase-auth: uid is {uid}")
         identifer = get_firebase_user_identifier(firebase_user)
         log.info(f'_get_or_create_local_user - email: {identifer}')
         user = None
@@ -114,6 +115,7 @@ class FirebaseAuthentication(authentication.TokenAuthentication):
             user.last_login = timezone.now()
             user.save()
         except User.DoesNotExist as e:
+            print("drf-firebase-auth: User.DoesNotExist exception was raised.")
             log.error(
                 f'_get_or_create_local_user - User.DoesNotExist: {identifier}'
             )
@@ -140,6 +142,8 @@ class FirebaseAuthentication(authentication.TokenAuthentication):
                         user.last_name = display_name[1]
                 user.save()
             except Exception as e:
+                print("drf-firebase-auth: Unable to create new user.")
+                print(f"drf-firebase-auth: The following exception occurred {e}")
                 raise Exception(e)
         return user
 
