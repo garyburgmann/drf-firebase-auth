@@ -22,7 +22,7 @@ from .models import (
     FirebaseUser,
     FirebaseUserProvider
 )
-from .utils import get_firebase_user_uid
+from .utils import get_firebase_user_uid, get_firebase_user_identifier
 from . import __title__
 
 log = logging.getLogger(__title__)
@@ -98,11 +98,12 @@ class FirebaseAuthentication(authentication.TokenAuthentication):
         """
         Attempts to return or create a local User from Firebase user data
         """
-        email = get_firebase_user_uid(firebase_user)
-        log.info(f'_get_or_create_local_user - email: {email}')
+        uid = get_firebase_user_uid(firebase_user)
+        identifer = get_firebase_user_identifier(firebase_user)
+        log.info(f'_get_or_create_local_user - email: {identifer}')
         user = None
         try:
-            user = User.objects.get(email=email)
+            user = User.objects.get(username=uid)
             log.info(
                 f'_get_or_create_local_user - user.is_active: {user.is_active}'
             )
@@ -114,19 +115,19 @@ class FirebaseAuthentication(authentication.TokenAuthentication):
             user.save()
         except User.DoesNotExist as e:
             log.error(
-                f'_get_or_create_local_user - User.DoesNotExist: {email}'
+                f'_get_or_create_local_user - User.DoesNotExist: {identifier}'
             )
             if not api_settings.FIREBASE_CREATE_LOCAL_USER:
                 raise Exception('User is not registered to the application.')
             username = \
                 api_settings.FIREBASE_USERNAME_MAPPING_FUNC(firebase_user)
             log.info(
-                f'_get_or_create_local_user - username: {username}'
+                f'_get_or_create_local_user - username: {uid}'
             )
             try:
                 user = User.objects.create_user(
-                    username=username,
-                    email=email
+                    username=uid,
+                    email=identifier
                 )
                 user.last_login = timezone.now()
                 if (
