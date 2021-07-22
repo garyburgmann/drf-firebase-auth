@@ -99,9 +99,8 @@ class FirebaseAuthentication(authentication.TokenAuthentication):
         Attempts to return or create a local User from Firebase user data
         """
         uid = get_firebase_user_uid(firebase_user)
-        print(f"drf-firebase-auth: uid is {uid}")
-        identifer = get_firebase_user_identifier(firebase_user)
-        log.info(f'_get_or_create_local_user - email: {identifer}')
+        identifier = get_firebase_user_identifier(firebase_user)
+        log.info(f'_get_or_create_local_user - email: {identifier}')
         user = None
         try:
             user = User.objects.get(username=uid)
@@ -115,7 +114,6 @@ class FirebaseAuthentication(authentication.TokenAuthentication):
             user.last_login = timezone.now()
             user.save()
         except User.DoesNotExist as e:
-            print("drf-firebase-auth: User.DoesNotExist exception was raised.")
             log.error(
                 f'_get_or_create_local_user - User.DoesNotExist: {identifier}'
             )
@@ -127,12 +125,10 @@ class FirebaseAuthentication(authentication.TokenAuthentication):
                 f'_get_or_create_local_user - username: {uid}'
             )
             try:
-                print("drf-firebase-auth: Starting to create user...")
                 user = User.objects.create_user(
                     username=uid,
                     email=identifier
                 )
-                print("drf-firebase-auth: New user was created succesufully.")
                 user.last_login = timezone.now()
                 if (
                     api_settings.FIREBASE_ATTEMPT_CREATE_WITH_DISPLAY_NAME
@@ -143,10 +139,7 @@ class FirebaseAuthentication(authentication.TokenAuthentication):
                         user.first_name = display_name[0]
                         user.last_name = display_name[1]
                 user.save()
-                print("drf-firebase-auth: New user was saved succesufully.")
             except Exception as e:
-                print("drf-firebase-auth: Unable to create new user.")
-                print(f"drf-firebase-auth: The following exception occurred {e}")
                 raise Exception(e)
         return user
 
