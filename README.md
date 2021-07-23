@@ -65,66 +65,10 @@ DRF_FIREBASE_AUTH = {
     # require that firebase user.email_verified is True
     'FIREBASE_AUTH_EMAIL_VERIFICATION':
         os.getenv('FIREBASE_AUTH_EMAIL_VERIFICATION', False),
-    # function should accept firebase_admin.auth.UserRecord as argument
-    # and return str
-    'FIREBASE_USERNAME_MAPPING_FUNC': map_firebase_uid_to_username
 }
 ```
 
 You can get away with leaving all the settings as default except for `FIREBASE_SERVICE_ACCOUNT_KEY`, which is obviously required.
-
-NOTE: `FIREBASE_USERNAME_MAPPING_FUNC` will replace behaviour in version < 1 as default (formerly provided by logic in `map_firebase_to_username_legacy`, described below). One can simply switch out this function.
-
-`drf_firebase_auth.utils` contains functions for mapping firebase user info to the Django username field (new in version >= 1). Any custom function can be supplied here, as long as it accepts a `firebase_admin.auth.UserRecord` argument. The supplied functions are common use-cases:
-
-```python
-def map_firebase_to_username_legacy(firebase_user: auth.UserRecord) -> str:
-    try:
-        username = '_'.join(
-            firebase_user.display_name.split(' ')
-            if firebase_user.display_name
-            else str(uuid.uuid4())
-        )
-        return username if len(username) <= 30 else username[:30]
-    except Exception as e:
-        raise Exception(e)
-
-
-def map_firebase_display_name_to_username(
-    firebase_user: auth.UserRecord
-) -> str:
-    try:
-        return '_'.join(firebase_user.display_name.split(' '))
-    except Exception as e:
-        raise Exception(e)
-
-
-def map_firebase_uid_to_username(
-    firebase_user: auth.UserRecord
-) -> str:
-    try:
-        return firebase_user.uid
-    except Exception as e:
-        raise Exception(e)
-
-
-def map_firebase_email_to_username(
-    firebase_user: auth.UserRecord
-) -> str:
-    try:
-        return get_firebase_user_email(firebase_user)
-    except Exception as e:
-        raise Exception(e)
-
-
-def map_uuid_to_username(
-    _: auth.UserRecord
-) -> str:
-    try:
-        return str(uuid.uuid4())
-    except Exception as e:
-        raise Exception(e)
-```
 
 Now that you have configured the application, run the migrations so that the Firebase data can be stored.
 
