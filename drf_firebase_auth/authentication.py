@@ -25,15 +25,19 @@ from .models import (
 from . import __title__
 
 # Setting up Logging
-log_level = logging.ERROR
+log = logging.getLogger(__title__)
+
+log_level = None
+if api_settings.DRF_LOG_LEVEL == 'ERROR':
+    log_level = logging.ERROR
 if api_settings.DRF_LOG_LEVEL == 'WARNING':
     log_level = logging.WARNING
 if api_settings.DRF_LOG_LEVEL == 'INFO':
     log_level = logging.INFO
 if api_settings.DRF_LOG_LEVEL == 'DEBUG':
     log_level = logging.DEBUG
-log = logging.getLogger(__title__)
-log.setLevel(log_level)
+if log_level:
+    log.setLevel(log_level)
 
 User = get_user_model()
 
