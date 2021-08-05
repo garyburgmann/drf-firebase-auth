@@ -38,6 +38,8 @@ The `drf_firebase_auth` application comes with the following settings as default
 
 ```python
 DRF_FIREBASE_AUTH = {
+    # sets logging level correct values are ERROR, WARNING, INFO and DEBUG
+    'DRF_LOG_LEVEL': os.getenv('DRF_LOG_LEVEL', 'ERROR'),
     # allow anonymous requests without Authorization header set
     'ALLOW_ANONYMOUS_REQUESTS': os.getenv('ALLOW_ANONYMOUS_REQUESTS', False),
     # path to JSON file with firebase secrets

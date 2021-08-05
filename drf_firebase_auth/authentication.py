@@ -24,7 +24,15 @@ from .models import (
 )
 from . import __title__
 
-log = logging.getLogger(__title__)
+log_level = logging.ERROR
+if api_settings.DRF_LOG_LEVEL == 'WARNING':
+    log_level = logging.WARNING
+if api_settings.DRF_LOG_LEVEL == 'INFO':
+    log_level = logging.INFO
+if api_settings.DRF_LOG_LEVEL == 'DEBUG':
+    log_level = logging.DEBUG
+
+log = logging.getLogger(__title__).setLevel(log_level)
 User = get_user_model()
 
 firebase_credentials = firebase_admin.credentials.Certificate(
@@ -129,6 +137,7 @@ class FirebaseAuthentication(authentication.TokenAuthentication):
             try:
                 kargs[api_settings.LOCAL_UNIQUE_USER_FIELD_NAME] = username
                 user = User.objects.create_user(**kargs)
+                log.debug('created user', user)
                 user.last_login = timezone.now()
                 if (
                     api_settings.FIREBASE_ATTEMPT_CREATE_WITH_DISPLAY_NAME
@@ -137,11 +146,14 @@ class FirebaseAuthentication(authentication.TokenAuthentication):
                     display_name = firebase_user.display_name.split(' ')
                     if len(display_name) == 2:
                         user.first_name = display_name[0]
-                        user.last_name = display_name[1]
+                        user.first_name = display_name[1]
+                    log.debug('set user user.first_name', user.first_name,
+                              'and user.first_name to', user.first_name)
                 user.save()
             except Exception as e:
+                log.debug('failed creating error')
                 raise Exception(e)
-        print('user', user.phone_number)
+        log.debug('user', user.phone_number)
         return user
 
     def _create_local_firebase_user(
