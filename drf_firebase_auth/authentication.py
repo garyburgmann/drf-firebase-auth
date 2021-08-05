@@ -139,7 +139,7 @@ class FirebaseAuthentication(authentication.TokenAuthentication):
             try:
                 kargs[api_settings.LOCAL_UNIQUE_USER_FIELD_NAME] = username
                 user = User.objects.create_user(**kargs)
-                log.debug('created user', user)
+                log.debug(f'created user {user}')
                 user.last_login = timezone.now()
                 if (
                     api_settings.FIREBASE_ATTEMPT_CREATE_WITH_DISPLAY_NAME
@@ -149,13 +149,13 @@ class FirebaseAuthentication(authentication.TokenAuthentication):
                     if len(display_name) == 2:
                         user.first_name = display_name[0]
                         user.first_name = display_name[1]
-                    log.debug('set user user.first_name', user.first_name,
-                              'and user.first_name to', user.first_name)
+                    log.debug(
+                        f'set user user.first_name {user.first_name}, and user.first_name to, {user.first_name}')
                 user.save()
             except Exception as e:
                 log.debug('failed creating error')
                 raise Exception(e)
-        log.debug('user', user.phone_number)
+        log.debug(f'user {user.phone_number}')
         return user
 
     def _create_local_firebase_user(
