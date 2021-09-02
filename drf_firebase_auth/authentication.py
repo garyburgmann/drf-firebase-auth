@@ -140,16 +140,16 @@ class FirebaseAuthentication(authentication.TokenAuthentication):
             try:
                 kargs[api_settings.LOCAL_UNIQUE_USER_FIELD_NAME] = username
                 kargs['last_login'] = timezone.now()
-                # if (
-                #     api_settings.FIREBASE_ATTEMPT_CREATE_WITH_DISPLAY_NAME
-                #     and firebase_user.display_name is not None
-                # ):
-                #     display_name = firebase_user.display_name.split(' ')
-                #     if len(display_name) == 2:
-                #         first_name = display_name[0]
-                #         first_name = display_name[1]
-                #     log.debug(
-                #         f'set user user.first_name {user.first_name}, and user.first_name to, {user.first_name}')
+                if (
+                    api_settings.FIREBASE_ATTEMPT_CREATE_WITH_DISPLAY_NAME
+                    and firebase_user.display_name is not None
+                ):
+                    display_name = firebase_user.display_name.split(' ')
+                    if len(display_name) == 2:
+                        first_name = display_name[0]
+                        first_name = display_name[1]
+                    log.debug(
+                        f'set user user.first_name {user.first_name}, and user.first_name to, {user.first_name}')
                 log.debug(f'kargs {kargs}')
                 user = User.objects.create_user(**kargs)
                 log.debug(f'created user {user}')
