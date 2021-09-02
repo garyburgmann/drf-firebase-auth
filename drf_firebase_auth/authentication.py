@@ -130,9 +130,6 @@ class FirebaseAuthentication(authentication.TokenAuthentication):
             user.last_login = timezone.now()
             user.save()
         except User.DoesNotExist as e:
-            log.error(
-                f'_get_or_create_local_user - User.DoesNotExist: {unique_user_value}'
-            )
             if not api_settings.FIREBASE_CREATE_LOCAL_USER:
                 raise Exception('User is not registered to the application.')
             username = \
@@ -142,24 +139,23 @@ class FirebaseAuthentication(authentication.TokenAuthentication):
             )
             try:
                 kargs[api_settings.LOCAL_UNIQUE_USER_FIELD_NAME] = username
+                kargs['last_login'] = timezone.now()
+                # if (
+                #     api_settings.FIREBASE_ATTEMPT_CREATE_WITH_DISPLAY_NAME
+                #     and firebase_user.display_name is not None
+                # ):
+                #     display_name = firebase_user.display_name.split(' ')
+                #     if len(display_name) == 2:
+                #         first_name = display_name[0]
+                #         first_name = display_name[1]
+                #     log.debug(
+                #         f'set user user.first_name {user.first_name}, and user.first_name to, {user.first_name}')
+                log.debug(f'kargs {kargs}')
                 user = User.objects.create_user(**kargs)
                 log.debug(f'created user {user}')
-                user.last_login = timezone.now()
-                if (
-                    api_settings.FIREBASE_ATTEMPT_CREATE_WITH_DISPLAY_NAME
-                    and firebase_user.display_name is not None
-                ):
-                    display_name = firebase_user.display_name.split(' ')
-                    if len(display_name) == 2:
-                        user.first_name = display_name[0]
-                        user.first_name = display_name[1]
-                    log.debug(
-                        f'set user user.first_name {user.first_name}, and user.first_name to, {user.first_name}')
-                user.save()
             except Exception as e:
-                log.debug('failed creating error')
+                log.debug(f'failed creating error {e}')
                 raise Exception(e)
-        log.debug(f'user {user.phone_number}')
         return user
 
     def _create_local_firebase_user(
