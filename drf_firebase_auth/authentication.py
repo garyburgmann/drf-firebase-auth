@@ -134,9 +134,9 @@ class FirebaseAuthentication(authentication.TokenAuthentication):
                     and firebase_user.display_name is not None
                 ):
                     display_name = firebase_user.display_name.split(' ')
-                    if len(display_name) == 2:
+                    if len(display_name) >= 2:
                         user.first_name = display_name[0]
-                        user.last_name = display_name[1]
+                        user.last_name = ' '.join(display_name[1:len(display_name)])
                 user.save()
             except Exception as e:
                 raise Exception(e)
