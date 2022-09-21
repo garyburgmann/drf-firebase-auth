@@ -5,11 +5,13 @@ import os
 from django.conf import settings
 from rest_framework.settings import APISettings
 
-from .utils import map_firebase_uid_to_username
+from .utils import map_firebase_uid_to_username, get_firebase_user_email
 
 USER_SETTINGS = getattr(settings, 'DRF_FIREBASE_AUTH', None)
 
 DEFAULTS = {
+    # sets logging level correct values are ERROR, WARNING, INFO and DEBUG
+    'DRF_LOG_LEVEL': os.getenv('DRF_LOG_LEVEL', 'ERROR'),
     # allow anonymous requests without Authorization header set
     'ALLOW_ANONYMOUS_REQUESTS': os.getenv('ALLOW_ANONYMOUS_REQUESTS', False),
     # path to JSON file with firebase secrets
@@ -33,7 +35,12 @@ DEFAULTS = {
         os.getenv('FIREBASE_AUTH_EMAIL_VERIFICATION', False),
     # function should accept firebase_admin.auth.UserRecord as argument
     # and return str
-    'FIREBASE_USERNAME_MAPPING_FUNC': map_firebase_uid_to_username
+    'FIREBASE_USERNAME_MAPPING_FUNC': map_firebase_uid_to_username,
+    # Local user unique field that will be used to map firebase user to local user
+    # Possible options are 'Email' and 'PhoneNumber'.
+    'FIREBASE_UNIQUE_USER_FIELD_MAPPING_FUNC': get_firebase_user_email,
+    'FIREBASE_UNIQUE_USER_FIELD_NAME': 'email',
+    'LOCAL_UNIQUE_USER_FIELD_NAME': 'email',
 }
 
 # List of settings that may be in string import notation.

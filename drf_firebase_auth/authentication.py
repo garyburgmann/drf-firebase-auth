@@ -8,7 +8,6 @@ import logging
 
 import firebase_admin
 from firebase_admin import auth as firebase_auth
-from django.utils.encoding import smart_text
 from django.utils import timezone
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser
@@ -22,10 +21,23 @@ from .models import (
     FirebaseUser,
     FirebaseUserProvider
 )
-from .utils import get_firebase_user_email
 from . import __title__
 
+# Setting up Logging
 log = logging.getLogger(__title__)
+
+log_level = None
+if api_settings.DRF_LOG_LEVEL == 'ERROR':
+    log_level = logging.ERROR
+if api_settings.DRF_LOG_LEVEL == 'WARNING':
+    log_level = logging.WARNING
+if api_settings.DRF_LOG_LEVEL == 'INFO':
+    log_level = logging.INFO
+if api_settings.DRF_LOG_LEVEL == 'DEBUG':
+    log_level = logging.DEBUG
+if log_level:
+    log.setLevel(log_level)
+
 User = get_user_model()
 
 firebase_credentials = firebase_admin.credentials.Certificate(
@@ -81,7 +93,7 @@ class FirebaseAuthentication(authentication.TokenAuthentication):
             log.info(f'_authenticate_token - uid: {uid}')
             firebase_user = firebase_auth.get_user(uid)
             log.info(f'_authenticate_token - firebase_user: {firebase_user}')
-            if api_settings.FIREBASE_AUTH_EMAIL_VERIFICATION:
+            if api_settings.FIREBASE_UNIQUE_USER_FIELD_NAME == 'email' and api_settings.FIREBASE_AUTH_EMAIL_VERIFICATION:
                 if not firebase_user.email_verified:
                     raise Exception(
                         'Email address of this user has not been verified.'
@@ -98,11 +110,15 @@ class FirebaseAuthentication(authentication.TokenAuthentication):
         """
         Attempts to return or create a local User from Firebase user data
         """
-        email = get_firebase_user_email(firebase_user)
-        log.info(f'_get_or_create_local_user - email: {email}')
+        unique_user_value = api_settings.FIREBASE_UNIQUE_USER_FIELD_MAPPING_FUNC(
+            firebase_user)
+        log.info(
+            f'_get_or_create_local_user - unique user value: {unique_user_value}')
         user = None
         try:
-            user = User.objects.get(email=email)
+            kargs = {
+                api_settings.LOCAL_UNIQUE_USER_FIELD_NAME: unique_user_value}
+            user = User.objects.get(**kargs)
             log.info(
                 f'_get_or_create_local_user - user.is_active: {user.is_active}'
             )
@@ -113,9 +129,6 @@ class FirebaseAuthentication(authentication.TokenAuthentication):
             user.last_login = timezone.now()
             user.save()
         except User.DoesNotExist as e:
-            log.error(
-                f'_get_or_create_local_user - User.DoesNotExist: {email}'
-            )
             if not api_settings.FIREBASE_CREATE_LOCAL_USER:
                 raise Exception('User is not registered to the application.')
             username = \
@@ -124,21 +137,18 @@ class FirebaseAuthentication(authentication.TokenAuthentication):
                 f'_get_or_create_local_user - username: {username}'
             )
             try:
-                user = User.objects.create_user(
-                    username=username,
-                    email=email
-                )
-                user.last_login = timezone.now()
+                kargs[api_settings.LOCAL_UNIQUE_USER_FIELD_NAME] = username
+                kargs['last_login'] = timezone.now()
                 if (
                     api_settings.FIREBASE_ATTEMPT_CREATE_WITH_DISPLAY_NAME
                     and firebase_user.display_name is not None
                 ):
-                    display_name = firebase_user.display_name.split(' ')
-                    if len(display_name) == 2:
-                        user.first_name = display_name[0]
-                        user.last_name = display_name[1]
-                user.save()
+                    kargs['first_name'] = firebase_user.display_name
+                log.debug(f'kargs {kargs}')
+                user = User.objects.create_user(**kargs)
+                log.debug(f'created user {user}')
             except Exception as e:
+                log.debug(f'failed creating error {e}')
                 raise Exception(e)
         return user
 
