@@ -8,7 +8,7 @@ import logging
 
 import firebase_admin
 from firebase_admin import auth as firebase_auth
-from django.utils.encoding import smart_text
+from django.utils.encoding import smart_str
 from django.utils import timezone
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser
